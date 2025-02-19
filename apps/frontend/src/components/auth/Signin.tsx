@@ -56,7 +56,7 @@ const Signin = () => {
             }
             <h1 className="text-3xl text-black font-bold">
               <span>Welcome To</span>
-              <span className="text-[#6ba9cc] text-5xl italic"> TalentX</span>
+              <span className="text-blue-600 text-5xl italic"> TalentX</span>
             </h1>
             <p className="mt-2">Sign in back into your account</p>
           </div>

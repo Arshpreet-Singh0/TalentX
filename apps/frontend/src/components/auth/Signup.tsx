@@ -2,7 +2,9 @@ import axios from "axios";
 import { useState } from "react";
 import { BACKEND_URL } from "../../config";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
+// import { message } from "antd";
+import { useAppDispatch } from "../../hooks/hook";
+import { setUser } from "../../redux/authSlice";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -13,6 +15,7 @@ const Signup = () => {
   });
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
 
   const handleChange = (e : React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,8 +29,9 @@ const Signup = () => {
         console.log(error);
         
         if(res?.data?.success){
-            message.success(res?.data?.message);
-            navigate('/signin')
+            dispatch(setUser(res?.data?.user));
+
+            navigate('/onboarding')
         }
     } catch (error) {
         if(axios.isAxiosError(error)){
@@ -53,7 +57,7 @@ const Signup = () => {
             }
             <h1 className="text-3xl text-black font-bold">
               <span>Welcome To</span>
-              <span className="text-[#6ba9cc] text-5xl italic"> TalentX</span>
+              <span className="text-blue-600 text-5xl italic"> TalentX</span>
             </h1>
             <p className="mt-2">Sign up to explore the world of opportunities!</p>
           </div>

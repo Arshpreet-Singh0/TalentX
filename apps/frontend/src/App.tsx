@@ -3,6 +3,10 @@ import Page from "./pages/Page"
 import Interface from "./pages/Interface"
 import SignupPage from "./pages/auth/SignupPage"
 import SigninPage from "./pages/auth/SigninPage"
+import NewProjectPage from "./pages/NewProjectPage"
+import OnboardingForm from "./pages/Onboarding"
+import ProjectDetail from "./pages/ProjectDetails"
+import Profile from "./pages/Profile"
 
 function App() {
 
@@ -13,6 +17,10 @@ function App() {
       {path:'/', element:<Interface />},
       {path:'/signup', element:<SignupPage />},
       {path:'/signin', element:<SigninPage />},
+      {path:'/onboarding', element:<OnboardingForm />},
+      {path:'/newproject', element:<NewProjectPage />},
+      {path:'/project/:id', element:<ProjectDetail />},
+      {path:'/profile/:username', element:<Profile />},
     ]
   }])
 

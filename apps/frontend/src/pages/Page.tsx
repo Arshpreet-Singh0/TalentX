@@ -1,11 +1,11 @@
-import { Outlet } from "react-router-dom"
+import { Outlet } from "react-router-dom";
 
 const Page = () => {
   return (
-    <>
-    <Outlet />
-    </>
-  )
-}
+    <div>
+      <Outlet />
+    </div>
+  );
+};
 
-export default Page
+export default Page;

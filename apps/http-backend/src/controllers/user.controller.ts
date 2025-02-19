@@ -18,11 +18,8 @@ export const signup = async (
 
     let user = await prisma.user.findFirst({
       where: {
-        OR: [
-          { username: username },
-          { email: email }
-        ]
-      }
+        OR: [{ username: username }, { email: email }],
+      },
     });
     if (user) {
       res.status(400).json({
@@ -158,18 +155,19 @@ export const updateUserProfile = async (
     }
 
     const updateData: any = {};
-
-    if (name !== undefined) updateData.name = name;
-    if (linkedinurl !== undefined) updateData.linkedinurl = linkedinurl;
-    if (githuburl !== undefined) updateData.githuburl = githuburl;
-    if (portfolio !== undefined) updateData.portfolio = portfolio;
+    if (name !== undefined && name.length > 0) updateData.name = name;
+    if (linkedinurl !== undefined && linkedinurl.length > 0)
+      updateData.linkedinurl = linkedinurl;
+    if (githuburl !== undefined && githuburl.length > 0)
+      updateData.githuburl = githuburl;
+    if (portfolio !== undefined && portfolio.length > 0)
+      updateData.portfolio = portfolio;
 
     if (skills !== undefined) {
       updateData.skills = Array.isArray(skills)
         ? skills
         : skills.split(",").map((skill: String) => skill.trim());
     }
-
     await prisma.user.update({
       where: { id: Number(userId) },
       data: updateData,
@@ -184,3 +182,29 @@ export const updateUserProfile = async (
     next(error);
   }
 };
+
+export const getProfile = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const user = await prisma.user.findUnique({
+      where : {
+        username : req.params.username,
+      },
+      include : {
+        Project : true,
+      }
+    });
+
+    res.status(200).json({
+      user,
+      success : true,
+    })
+
+  } catch (error) {
+    console.log(error);
+    next(error);
+  }
+}

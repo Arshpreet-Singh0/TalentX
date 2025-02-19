@@ -26,7 +26,7 @@ const PORT = process.env.PORT || 8080;
 
 app.use('/api/v1', userRouter);
 app.use('/api/v1/project', projectRouter);
-app.use('/api/v1/commet', commentRouter);
+app.use('/api/v1/comment', commentRouter);
 
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     const statusCode = err.status || 500;

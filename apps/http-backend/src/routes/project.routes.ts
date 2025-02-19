@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { isAuthenticated } from '../middlewares/isAuthenticated';
+import { isAuthenticated } from '../controllers/middlewares/isAuthenticated';
 import { getProjectById, getProjects, postproject } from '../controllers/project.controller';
 const router : Router = express.Router();
 

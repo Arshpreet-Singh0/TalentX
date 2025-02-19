@@ -1,7 +1,11 @@
-import { Home, Search, PlusSquare, Heart, MessageCircle, Menu } from 'lucide-react';
+import { Home, Search, PlusSquare, Heart, MessageCircle, Menu, User } from 'lucide-react';
 import { ReactElement } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAppSelector } from '../hooks/hook';
 
 const Sidebar = () => {
+  const navigte = useNavigate();
+  const {user} = useAppSelector(stORE=>stORE.auth);
   return (
     <aside className="w-16 md:w-64 bg-white border-r border-gray-200">
       <div className="h-full flex flex-col">
@@ -12,10 +16,10 @@ const Sidebar = () => {
         
         <nav className="flex-1 px-2 py-4">
           <ul className="space-y-2">
-            <SidebarItem icon={<Home />} label="Home" active />
+            <SidebarItem icon={<Home />} label="Home" active onClick={()=>navigte('/')}/>
             <SidebarItem icon={<Search />} label="Discover" />
-            <SidebarItem icon={<PlusSquare />} label="New Project" />
-            <SidebarItem icon={<Heart />} label="Liked" />
+            <SidebarItem icon={<PlusSquare />} label="New Project" onClick={()=>navigte('/newproject')}/>
+            <SidebarItem icon={<User />} label="Profile" onClick={()=>navigte(`/profile/${user?.username}`)}/>
             <SidebarItem icon={<MessageCircle />} label="Messages" />
           </ul>
         </nav>
@@ -31,13 +35,14 @@ const Sidebar = () => {
   );
 };
 
-const SidebarItem = ({ icon, label, active = false } : {
+const SidebarItem = ({ icon, label, onClick , active = false } : {
   icon : ReactElement,
   label : string,
-  active? : boolean
+  active? : boolean,
+  onClick? : ()=>void;
 }) => {
   return (
-    <li>
+    <li onClick={onClick}>
       <a
         href="#"
         className={`flex items-center space-x-3 p-2 rounded-lg transition-colors ${
