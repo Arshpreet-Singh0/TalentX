@@ -3,6 +3,7 @@ import { Heart, MessageCircle, X, Trash2 } from "lucide-react";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
 import { useAppSelector } from "../hooks/hook";
+import { useNavigate } from "react-router-dom";
 
 interface ProjectCardProps {
   username: string;
@@ -11,6 +12,7 @@ interface ProjectCardProps {
   description: string;
   likes: number;
   projectId: number;
+  avatar : string;
 }
 
 interface Comment {
@@ -31,12 +33,14 @@ const ProjectCard = ({
   description,
   likes,
   projectId,
+  avatar
 }: ProjectCardProps) => {
   const [isCommentsOpen, setIsCommentsOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingText, setEditingText] = useState("");
+  const navigate = useNavigate();
 
   const { user } = useAppSelector((store) => store.auth); // Getting the logged-in user
 
@@ -119,13 +123,13 @@ const ProjectCard = ({
     <article className="bg-white rounded-xl shadow-sm overflow-hidden relative">
       <div className="flex items-center justify-between p-4">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+          <div className="w-12 h-12 bg-gray-200 rounded-full"><img src={avatar} className="w-12 h-12 bg-gray-200 rounded-full" alt="" /></div>
           <div>
             <h3 className="font-medium">{username}</h3>
             <p className="text-sm text-gray-500">Student Developer</p>
           </div>
         </div>
-        <button className="text-blue-600 font-medium">Follow</button>
+        <button className="text-blue-600 font-medium" onClick={()=>navigate(`/project/${projectId}`)}>View Details</button>
       </div>
 
       <div className="relative aspect-video">

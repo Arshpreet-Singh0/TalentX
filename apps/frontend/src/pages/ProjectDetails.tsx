@@ -5,6 +5,8 @@ import axios from "axios";
 import { BACKEND_URL } from "../config";
 import Sidebar from "../components/Sidebar";
 import { useAppSelector } from "../hooks/hook";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface User {
   username: string;
@@ -60,6 +62,7 @@ const ProjectDetail = () => {
     fetchProject();
   }, [id]);
 
+
   const handleDeleteComment = async (commentId: number) => {
     try {
       await axios.delete(`${BACKEND_URL}/api/v1/comment/${commentId}`, {
@@ -87,7 +90,6 @@ const ProjectDetail = () => {
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
-
     try {
       const res = await axios.post(`${BACKEND_URL}/api/v1/comment`, {
         projectid: id,
@@ -106,7 +108,25 @@ const ProjectDetail = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex h-screen bg-gray-50">
+        <Sidebar />
+        <div className="w-[60%] mx-auto py-8 px-4 overflow-y-auto">
+          <div className="flex items-center mb-8">
+            <Skeleton circle height={64} width={64} />
+            <div className="ml-4">
+              <Skeleton width={120} height={20} />
+              <Skeleton width={100} height={16} />
+            </div>
+          </div>
+          <Skeleton height={400} />
+          <div className="mt-6">
+            <Skeleton width={200} height={30} />
+            <Skeleton count={3} />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (!project) {

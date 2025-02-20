@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import ProjectCard from "../components/ProjectCard";
 import { BACKEND_URL } from "../config";
 import axios from "axios";
-import { useAppSelector } from "../hooks/hook";
 import Sidebar from "../components/Sidebar";
 
 interface User {
@@ -11,6 +10,7 @@ interface User {
   linkedinurl: string;
   email: string;
   username: string;
+  avatar : string;
 }
 
 interface Project {
@@ -27,15 +27,13 @@ interface Project {
 }
 
 function Interface() {
-  const { user } = useAppSelector((store) => store.auth);
 
   const [projects, setProjects] = useState<Project[]>([]);
 
   useEffect(() => {
     const getProjects = async () => {
       try {
-        const res = await axios.get(`${BACKEND_URL}/api/v1/project`);
-
+        const res = await axios.get(`${BACKEND_URL}/api/v1/project/get`);
         setProjects(res?.data?.projects);
       } catch (error) {
         console.log(error);
@@ -60,6 +58,7 @@ function Interface() {
                     projectTitle={project.title}
                     image={project?.images?.[0]}
                     description={project.title}
+                    avatar={project?.User?.avatar}
                     likes={567}
                     // comments={89}
                     projectId={project.id}

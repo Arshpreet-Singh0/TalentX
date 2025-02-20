@@ -1,11 +1,18 @@
-import { Home, Search, PlusSquare, Heart, MessageCircle, Menu, User } from 'lucide-react';
+import { Home, Search, PlusSquare, MessageCircle, Menu, User } from 'lucide-react';
 import { ReactElement } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppSelector } from '../hooks/hook';
+import { useAppDispatch, useAppSelector } from '../hooks/hook';
+import { clearUser, isUserLoggedIn } from '../redux/authSlice';
 
 const Sidebar = () => {
   const navigte = useNavigate();
-  const {user} = useAppSelector(stORE=>stORE.auth);
+  const isUserExist = useAppSelector(isUserLoggedIn);
+  const {user} = useAppSelector(store=>store.auth);
+  const dispatch = useAppDispatch();
+
+  const handleLogout = ()=>{
+      dispatch(clearUser());
+  }
   return (
     <aside className="w-16 md:w-64 bg-white border-r border-gray-200">
       <div className="h-full flex flex-col">
@@ -20,14 +27,27 @@ const Sidebar = () => {
             <SidebarItem icon={<Search />} label="Discover" />
             <SidebarItem icon={<PlusSquare />} label="New Project" onClick={()=>navigte('/newproject')}/>
             <SidebarItem icon={<User />} label="Profile" onClick={()=>navigte(`/profile/${user?.username}`)}/>
-            <SidebarItem icon={<MessageCircle />} label="Messages" />
+            <SidebarItem icon={<MessageCircle />} label="Messages" onClick={()=>navigte('/chats')}/>
           </ul>
         </nav>
         
         <div className="p-4 border-t border-gray-200">
-          <button className="hidden md:block w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
-            Share Project
+          {
+            isUserExist ? (
+              <button className="hidden md:block w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onClick={handleLogout}>
+            Logout
           </button>
+            ) : (
+              <div className='flex flex-col gap-2'>
+                  <button className="hidden md:block w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onClick={()=>navigte('/signin')}>
+            Signin
+          </button>
+          <button className="hidden md:block w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors" onClick={()=>navigte('/signup')}>
+            Signup
+          </button>
+              </div>
+            )
+          }
           <PlusSquare className="md:hidden w-6 h-6" />
         </div>
       </div>

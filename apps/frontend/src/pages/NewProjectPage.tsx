@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import { Send } from "lucide-react";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "../config";
 import { message } from "antd";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "../components/Sidebar";
+import Loader from "../components/Loader";
+import { useAppSelector } from "../hooks/hook";
+import { isUserLoggedIn } from "../redux/authSlice";
 
 interface ProjectFormData {
   title: string;
   description: string;
   skills: string[];
-  images: string[];
   githubUrl: string;
   liveUrl: string;
 }
@@ -19,7 +20,6 @@ const initialFormData: ProjectFormData = {
   title: "",
   description: "",
   skills: [],
-  images: [],
   githubUrl: "",
   liveUrl: "",
 };
@@ -27,11 +27,18 @@ const initialFormData: ProjectFormData = {
 function ProjectForm() {
   const [formData, setFormData] = useState<ProjectFormData>(initialFormData);
   const [skillsInput, setSkillsInput] = useState<string>("");
-  const [imagesInput, setImagesInput] = useState<string>("");
   const [errors, setErrors] = useState<Partial<ProjectFormData>>({});
   const [error, setError] = useState("");
-
+  const [files, setFiles] = useState<File[]>([]);
+  const [loading, setLoading] = useState(false);
+  const isUserExist = useAppSelector(isUserLoggedIn);
   const navigate = useNavigate();
+
+  useEffect(()=>{
+      if(!isUserExist){
+        navigate('/signin');
+      }
+  },[]);
 
   // Handle input changes
   const handleChange = (
@@ -41,8 +48,6 @@ function ProjectForm() {
 
     if (name === "skills") {
       setSkillsInput(value);
-    } else if (name === "images") {
-      setImagesInput(value);
     } else {
       setFormData((prev) => ({
         ...prev,
@@ -51,7 +56,7 @@ function ProjectForm() {
     }
   };
 
-  // Convert comma-separated input to an array on blur
+  // Convert skills input into an array
   const handleSkillsBlur = () => {
     setFormData((prev) => ({
       ...prev,
@@ -62,33 +67,23 @@ function ProjectForm() {
     }));
   };
 
-  const handleImagesBlur = () => {
-    setFormData((prev) => ({
-      ...prev,
-      images: imagesInput
-        .split(",")
-        .map((image) => image.trim())
-        .filter(Boolean),
-    }));
+  // Handle file upload
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const uploadedFiles = Array.from(e.target.files);
+      setFiles((prevFiles) => [...prevFiles, ...uploadedFiles]);
+    }
   };
 
   // Form validation
   const validateForm = (): boolean => {
     const newErrors: Partial<ProjectFormData> = {};
 
-    if (!formData.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-    if (!formData.description.trim()) {
-      newErrors.description = "Description is required";
-    }
-    if (formData.skills.length === 0) {
-      //@ts-ignore
-      newErrors.skills = "At least one skill is required";
-    }
-    if (!formData.githubUrl.trim()) {
-      newErrors.githubUrl = "GitHub URL is required";
-    }
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.description.trim()) newErrors.description = "Description is required";
+    //@ts-ignore
+    if (formData.skills.length === 0) newErrors.skills = "At least one skill is required";
+    if (!formData.githubUrl.trim()) newErrors.githubUrl = "GitHub URL is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -99,18 +94,23 @@ function ProjectForm() {
     e.preventDefault();
 
     handleSkillsBlur();
-    handleImagesBlur();
-
+    setLoading(true);
     if (validateForm()) {
+      const data = new FormData();
+      data.append("title", formData.title);
+      data.append("description", formData.description);
+      data.append("githubUrl", formData.githubUrl);
+      formData.skills.forEach((skill) => data.append("skills", skill));
+
+      files.forEach((file) => {
+        data.append("images", file);
+      });
+      
       try {
-        const res = await axios.post(
-          `${BACKEND_URL}/api/v1/project`,
-          formData,
-          {
-            withCredentials: true,
-          }
-        );
-        console.log(res);
+        const res = await axios.post(`${BACKEND_URL}/api/v1/project`, data, {
+          withCredentials: true,
+          headers: { "Content-Type": "multipart/form-data" },
+        });
 
         if (res?.data?.success) {
           message.success(res?.data?.message);
@@ -118,20 +118,28 @@ function ProjectForm() {
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          setError(error?.response?.data?.message);
-          console.log(error);
+          setError(error?.response?.data?.message || "Upload failed.");
         } else {
-          console.log(error);
           setError("Internal server error.");
         }
+        console.log(error);
+        
+      }finally{
+        setLoading(false);
       }
     }
   };
 
+  if(loading){
+    return <Loader />
+  }
+
   return (
-    <form
+    <div className="flex h-screen bg-gray-50">
+      <Sidebar />
+      <form
       onSubmit={handleSubmit}
-      className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg"
+      className="w-[60%] mx-auto p-6 bg-white rounded-lg shadow-lg"
     >
       {error && <h2 className="text-md text-red-600 text-center">{error}</h2>}
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
@@ -141,161 +149,119 @@ function ProjectForm() {
       <div className="space-y-4">
         {/* Title */}
         <div>
-          <label
-            htmlFor="title"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Project Title *
           </label>
           <input
             type="text"
-            id="title"
             name="title"
             value={formData.title}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-md ${
               errors.title ? "border-red-500" : "border-gray-300"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            }`}
             placeholder="Enter project title"
           />
-          {errors.title && (
-            <p className="mt-1 text-sm text-red-500">{errors.title}</p>
-          )}
+          {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title}</p>}
         </div>
 
         {/* Description */}
         <div>
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Description *
           </label>
           <textarea
-            id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
             className={`w-full px-3 py-2 border rounded-md ${
               errors.description ? "border-red-500" : "border-gray-300"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            }`}
             placeholder="Describe your project"
           />
-          {errors.description && (
-            <p className="mt-1 text-sm text-red-500">{errors.description}</p>
-          )}
+          {errors.description && <p className="mt-1 text-sm text-red-500">{errors.description}</p>}
         </div>
 
         {/* Skills */}
         <div>
-          <label
-            htmlFor="skills"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             Skills (comma-separated) *
           </label>
           <input
             type="text"
-            id="skills"
             name="skills"
             value={skillsInput}
             onChange={handleChange}
             onBlur={handleSkillsBlur}
             className={`w-full px-3 py-2 border rounded-md ${
               errors.skills ? "border-red-500" : "border-gray-300"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
+            }`}
             placeholder="React, TypeScript, Node.js"
           />
-          {errors.skills && (
-            <p className="mt-1 text-sm text-red-500">{errors.skills}</p>
-          )}
+          {errors.skills && <p className="mt-1 text-sm text-red-500">{errors.skills}</p>}
         </div>
 
-        {/* Images */}
+        {/* File Upload */}
         <div>
-          <label
-            htmlFor="images"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Images (comma-separated URLs)
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Upload Images (multiple allowed)
           </label>
-          <input
-            type="text"
-            id="images"
-            name="images"
-            value={imagesInput}
-            onChange={handleChange}
-            onBlur={handleImagesBlur}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="https://image1.com, https://image2.com"
-          />
+          <input type="file" accept="image/*" onChange={handleFileUpload} multiple />
         </div>
+
+        {/* Display selected images */}
+        {files.length > 0 && (
+          <div className="flex gap-2 mt-2">
+            {files.map((file, index) => (
+              <img
+                key={index}
+                src={URL.createObjectURL(file)}
+                alt="Selected"
+                className="w-20 h-20 object-cover rounded-md"
+              />
+            ))}
+          </div>
+        )}
 
         {/* GitHub URL */}
         <div>
-          <label
-            htmlFor="githubUrl"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
+          <label className="block text-sm font-medium text-gray-700 mb-1">
             GitHub URL *
           </label>
           <input
             type="text"
-            id="githubUrl"
             name="githubUrl"
             value={formData.githubUrl}
             onChange={handleChange}
-            className={`w-full px-3 py-2 border rounded-md ${
-              errors.githubUrl ? "border-red-500" : "border-gray-300"
-            } focus:outline-none focus:ring-2 focus:ring-blue-500`}
-            placeholder="https://github.com/your-repo"
+            className="w-full px-3 py-2 border rounded-md border-gray-300"
+            placeholder="https://github.com/yourproject"
           />
-          {errors.githubUrl && (
-            <p className="mt-1 text-sm text-red-500">{errors.githubUrl}</p>
-          )}
         </div>
-
-        {/* Live URL */}
         <div>
-          <label
-            htmlFor="liveUrl"
-            className="block text-sm font-medium text-gray-700 mb-1"
-          >
-            Live Project URL
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Live url
           </label>
           <input
             type="text"
-            id="liveUrl"
             name="liveUrl"
             value={formData.liveUrl}
             onChange={handleChange}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="https://your-live-project.com"
+            className="w-full px-3 py-2 border rounded-md border-gray-300"
+            placeholder="https://github.com/yourproject"
           />
         </div>
-      </div>
 
-      {/* Submit Button */}
-      <button
-        type="submit"
-        className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center gap-2 transition-colors"
-      >
-        <Send size={20} />
-        Upload Project
-      </button>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+        >
+          Submit Project
+        </button>
+      </div>
     </form>
+    </div>
   );
 }
 
-const NewProjectPage = () => {
-  return (
-    <div className="flex h-screen bg-gray-50">
-      <Sidebar />
-      <div className="min-h-screen bg-gray-100 py-12 w-full">
-        <ProjectForm />
-      </div>
-    </div>
-  );
-};
-
-export default NewProjectPage;
+export default ProjectForm;

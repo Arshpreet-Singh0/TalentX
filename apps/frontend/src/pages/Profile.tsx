@@ -1,9 +1,11 @@
-import { Github, Linkedin, Code2 } from 'lucide-react';
+import { Github, Linkedin, Code2} from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { BACKEND_URL } from '../config';
 import axios from 'axios';
+import Loader from '../components/Loader';
+import Modal from '../components/Model';
 
 interface User {
     name : string;
@@ -36,12 +38,16 @@ interface User {
     User: User;
   }
 
+
+
 function Profile() {
   // This would typically come from an API or database
   const [user, setUser] = useState<User>();
   const [loading, setLoading] = useState(true);
+  const [open, setIsOpen] = useState(false);
 
   const {username} = useParams();
+  const navigate = useNavigate();
 
   useEffect(()=>{
     const fetchUserProfile = async()=>{
@@ -61,11 +67,10 @@ function Profile() {
     fetchUserProfile();
   },[username]);
 
-  console.log(user);
 
   if(loading){
     return (
-        <div>Loading...</div>
+        <Loader />
     );
   }
 
@@ -79,10 +84,11 @@ function Profile() {
   return (
     <div className="flex h-screen bg-gray-50">
         <Sidebar />
+      <Modal isOpen={open} onClose={()=>setIsOpen(false)} id={user?.id}/>
     <div className="min-h-screen bg-gray-50 w-full">
       {/* Header Section */}
       <div className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
+        <div className="flex gap-40 items-center max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8">
           <div className="flex items-center space-x-8">
             <img
               src={user.avatar}
@@ -114,6 +120,9 @@ function Profile() {
               </div>
             </div>
           </div>
+          <div>
+            <button className='py-2 px-4 rounded-lg bg-blue-600 text-white' onClick={()=>setIsOpen(true)}>Message me</button>
+          </div>
         </div>
       </div>
 
@@ -140,6 +149,7 @@ function Profile() {
             <div
               key={project.id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300"
+              onClick={()=>navigate(`/project/${project.id}`)}
             >
               <img
                 src={project.images?.[0]}
@@ -150,7 +160,7 @@ function Profile() {
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
                   {project.title}
                 </h3>
-                <p className="text-gray-600 mb-4">{project.description}</p>
+                <p className="text-gray-600 mb-4">{project?.description?.substring(0,50)}...</p>
                 <div className="flex flex-wrap gap-2">
                   {project?.skills.map((tech) => (
                     <span

@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import prisma from "../config/prisma";
+import cloudinary from "../config/cloudinary";
+import getDataUri from "../config/dataURI";
 
 export const postproject = async (
   req: Request,
@@ -7,18 +9,30 @@ export const postproject = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const { images, title, description, skills, githuburl, liveurl } = req.body;
+    const { title, description, skills, githuburl, liveurl } = req.body;
     const userid = req.userId;
 
-    if (!title || !description || !skills || !userid || !images) {
+    if (!title || !description || !skills || !userid) {
       res.status(400).json({ message: "All fields required." });
       return;
     }
+    //@ts-ignore
+    const filesDataUri = req?.files?.map((file) => {
+      return getDataUri(file);
+    });
+    //@ts-ignore
+    const uploadPromises = filesDataUri.map((dataUri) =>
+      cloudinary.uploader.upload(dataUri.content, { folder: "E-Commerce" })
+    );
 
-    if (!Array.isArray(skills) || !Array.isArray(images)) {
-      res.status(400).json({ message: "Skills and images must be arrays." });
-      return;
-    }
+    // Wait for all uploads to complete
+    const uploadedFiles = await Promise.all(uploadPromises);
+    //@ts-ignore
+    const images = uploadedFiles.map((data) => {
+      return data.secure_url;
+    });
+    console.log(images);
+    
 
     const newProject = await prisma.project.create({
       data: {
@@ -54,12 +68,15 @@ export const getProjects = async (
         User: {
           select: {
             name: true,
-            linkedinurl: true,
-            email: true,
             username: true,
+            avatar: true,
+            id: true,
           },
         },
       },
+      orderBy : {
+        createdAt : "desc"
+      }
     });
 
     res.status(200).json({

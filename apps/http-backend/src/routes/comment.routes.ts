@@ -1,5 +1,5 @@
 import express, { Router } from 'express';
-import { isAuthenticated } from '../controllers/middlewares/isAuthenticated';
+import { isAuthenticated } from '../middlewares/isAuthenticated';
 import { deleteComment, getComments, postComment } from '../controllers/comment.controller';
 const router : Router = express.Router();
 

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { BACKEND_URL } from "../../config";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 // import { message } from "antd";
 import { useAppDispatch } from "../../hooks/hook";
 import { setUser } from "../../redux/authSlice";
@@ -25,7 +25,9 @@ const Signup = () => {
     setError("");
     e.preventDefault();
     try {
-        const res = await axios.post(`${BACKEND_URL}/api/v1/signup`, formData );
+        const res = await axios.post(`${BACKEND_URL}/api/v1/signup`, formData , {
+          withCredentials : true
+        });
         console.log(error);
         
         if(res?.data?.success){
@@ -112,11 +114,13 @@ const Signup = () => {
 
             <button
               type="submit"
-              className="w-full bg-[#8A2BE2] hover:bg-[#7a23c9] text-white font-medium py-3 rounded-lg transition"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 rounded-lg transition"
             >
               <span className="text-gray-200 text-2xl font-bold">Sign up</span>
             </button>
           </form>
+
+          <h2 className="mt-5">Already have an account ? <Link to={'/signin'} className="text-blue-500">Signin</Link></h2>
         </div>
       </div>
     </div>
