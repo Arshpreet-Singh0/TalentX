@@ -25,9 +25,16 @@ const Sidebar = () => {
           <ul className="space-y-2">
             <SidebarItem icon={<Home />} label="Home" active onClick={()=>navigte('/')}/>
             <SidebarItem icon={<Search />} label="Discover" onClick={()=>navigte('/discover')}/>
+            {
+              isUserExist && (
+            <>
             <SidebarItem icon={<PlusSquare />} label="New Project" onClick={()=>navigte('/newproject')}/>
             <SidebarItem icon={<User />} label="Profile" onClick={()=>navigte(`/profile/${user?.username}`)}/>
             <SidebarItem icon={<MessageCircle />} label="Messages" onClick={()=>navigte('/chats')}/>
+            </>
+
+              )
+            }
           </ul>
         </nav>
         

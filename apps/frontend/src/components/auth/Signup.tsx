@@ -85,7 +85,7 @@ const Signup = () => {
                 value={formData.name}
                 onChange={handleChange}
                 className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8A2BE2] focus:border-transparent"
-                placeholder="Enter unique username"
+                placeholder="Enter your name"
               />
             </div>
             <div>
@@ -96,7 +96,7 @@ const Signup = () => {
                 value={formData.username}
                 onChange={handleChange}
                 className="w-full bg-white border border-gray-300 rounded-lg py-3 px-4 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8A2BE2] focus:border-transparent"
-                placeholder="Enter your name"
+                placeholder="Enter unique username"
               />
             </div>
 

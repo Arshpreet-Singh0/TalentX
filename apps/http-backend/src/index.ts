@@ -11,14 +11,14 @@ import prisma from "./config/prisma"
 const app = express();
 
 app.use(
-    cors({
-      origin: ["http://localhost:3000"],
-      credentials: true,
-      methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
-      allowedHeaders: ["Content-Type", "Authorization"],
-    })
-  );
-  
+  cors({
+    origin: ["http://localhost:3000", "http://ec2-54-90-122-141.compute-1.amazonaws.com:3000"],
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+);
+
 app.use(express.json());
 app.use(cookieParser());
 
