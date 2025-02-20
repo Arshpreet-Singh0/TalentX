@@ -132,7 +132,6 @@ const ProjectDetail = () => {
   if (!project) {
     return <div>no project found.</div>;
   }
-
   return (
     <div className="flex h-screen bg-gray-50">
       <Sidebar />

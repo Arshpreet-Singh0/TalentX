@@ -28,6 +28,8 @@ wss.on("connection", (ws, req)=>{
     }
 
     connection.set(userId, ws);
+    console.log(userId);
+    
 
     ws.on("message", async(data)=>{
         const parsedData = JSON.parse(data as unknown as string);

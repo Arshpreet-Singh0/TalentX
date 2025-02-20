@@ -6,9 +6,9 @@ console.log(process.env.CLOUDINARY_CLOUD_NAME);
 
 
 cloudinary.config({
-  cloud_name: "djusmuols",
-  api_key: "845295375246337",
-  api_secret: "cutxPnuSrJl2ZTMvTApsdwu4yCU",
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET,
 });
 
 export default cloudinary;

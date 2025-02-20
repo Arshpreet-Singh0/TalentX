@@ -99,7 +99,8 @@ function ProjectForm() {
       const data = new FormData();
       data.append("title", formData.title);
       data.append("description", formData.description);
-      data.append("githubUrl", formData.githubUrl);
+      data.append("githuburl", formData.githubUrl);
+      data.append("liveurl", formData.liveUrl);
       formData.skills.forEach((skill) => data.append("skills", skill));
 
       files.forEach((file) => {
