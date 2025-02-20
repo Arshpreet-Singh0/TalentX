@@ -132,6 +132,80 @@ app.post("/send-message/:id", isAuthenticated, async(req, res, next : NextFuncti
   }
 });  
 
+app.get('/search', async (req : Request, res : Response, next : NextFunction) : Promise<void> => {
+  try {
+    const { query } = req.query; // Get the search query from the request
+
+    if (!query) {
+      res.status(400).json({ message: "Search query is required" });
+      return;
+    }
+
+    // Search Users by matching skills
+    const users = await prisma.user.findMany({
+      where: {
+        OR: [
+          {skills: {
+            hasSome: [query as string], // Matches users who have the query in their skills array
+          }},
+          {
+            name : {
+              contains : query as string,
+            }
+          },
+          {
+            username : {
+              contains : query as string
+            }
+          }
+        ]
+        
+      },
+      select: {
+        id: true,
+        name: true,
+        username: true,
+        avatar: true,
+        skills: true,
+      },
+    });
+
+    // Search Projects by matching title, description, or skills
+    const projects = await prisma.project.findMany({
+      where: {
+        OR: [
+          { title: { contains: query as string, mode: "insensitive" } },
+          { description: { contains : query as string, mode: "insensitive" } },
+          { skills: { hasSome: [query as string] } }, // Matches projects with the query in skills
+        ],
+      },
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        githuburl: true,
+        liveurl: true,
+        skills: true,
+        likeCount: true,
+        images: true,
+        User: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            avatar: true,
+          },
+        },
+      },
+    });
+
+    res.status(200).json({ users, projects });
+    
+  } catch (error) {
+    console.error("Search Error:", error);
+    next(error);
+  }
+});
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     const statusCode = err.status || 500;
     res.status(statusCode).json({

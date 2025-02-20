@@ -10,6 +10,6 @@ export default defineConfig({
     port: 3000,                // Ensure your project runs on port 3000
     host: "0.0.0.0",           // Allow external access (important for EC2)
     strictPort: true,          // Ensure Vite only runs on the specified port
-    allowedHosts: ["*"]  // Allow EC2 host
+    allowedHosts: true  // Allow EC2 host
   }
 })

@@ -8,6 +8,7 @@ import OnboardingForm from "./pages/Onboarding"
 import ProjectDetail from "./pages/ProjectDetails"
 import Profile from "./pages/Profile"
 import ChatPage from "./pages/chats/ChatPage"
+import Discover from "./pages/Discover"
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
       {path:'/newproject', element:<NewProjectPage />},
       {path:'/project/:id', element:<ProjectDetail />},
       {path:'/profile/:username', element:<Profile />},
+      {path:'/discover', element:<Discover />},
       {path:'/chats', element:<ChatPage />},
     ]
   }])

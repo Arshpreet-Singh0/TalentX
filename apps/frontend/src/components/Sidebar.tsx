@@ -24,7 +24,7 @@ const Sidebar = () => {
         <nav className="flex-1 px-2 py-4">
           <ul className="space-y-2">
             <SidebarItem icon={<Home />} label="Home" active onClick={()=>navigte('/')}/>
-            <SidebarItem icon={<Search />} label="Discover" />
+            <SidebarItem icon={<Search />} label="Discover" onClick={()=>navigte('/discover')}/>
             <SidebarItem icon={<PlusSquare />} label="New Project" onClick={()=>navigte('/newproject')}/>
             <SidebarItem icon={<User />} label="Profile" onClick={()=>navigte(`/profile/${user?.username}`)}/>
             <SidebarItem icon={<MessageCircle />} label="Messages" onClick={()=>navigte('/chats')}/>

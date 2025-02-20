@@ -140,7 +140,7 @@ function ProjectForm() {
       <Sidebar />
       <form
       onSubmit={handleSubmit}
-      className="w-[60%] mx-auto p-6 bg-white rounded-lg shadow-lg"
+      className="w-[45%] mx-auto p-6 bg-white rounded-lg shadow-lg"
     >
       {error && <h2 className="text-md text-red-600 text-center">{error}</h2>}
       <h2 className="text-2xl font-bold mb-6 text-gray-800">
